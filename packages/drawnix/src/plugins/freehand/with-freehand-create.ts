@@ -2,7 +2,6 @@ import {
   PlaitBoard,
   Point,
   Transforms,
-  createG,
   throttleRAF,
   toHostPoint,
   toViewBoxPoint,

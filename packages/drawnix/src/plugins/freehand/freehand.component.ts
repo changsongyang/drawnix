@@ -4,6 +4,7 @@ import {
   OnContextChanged,
   RectangleClient,
   isSelectionMoving,
+  ACTIVE_STROKE_WIDTH,
 } from '@plait/core';
 import { ActiveGenerator, CommonElementFlavour } from '@plait/common';
 import { Freehand } from './type';
@@ -26,8 +27,8 @@ export class FreehandComponent
       getRectangle: (element: Freehand) => {
         return RectangleClient.getRectangleByPoints(element.points);
       },
-      getStrokeWidth: () => 0,
-      getStrokeOpacity: () => 0,
+      getStrokeWidth: () => ACTIVE_STROKE_WIDTH,
+      getStrokeOpacity: () => 1,
       hasResizeHandle: () => {
         return !isSelectionMoving(this.board);
       },
@@ -45,13 +46,34 @@ export class FreehandComponent
     value: PlaitPluginElementContext<Freehand, PlaitBoard>,
     previous: PlaitPluginElementContext<Freehand, PlaitBoard>
   ) {
-    if (value.element !== previous.element) {
+    const isChangeTheme = this.board.operations.find(
+      (op) => op.type === 'set_theme'
+    );
+    if (value.element !== previous.element || isChangeTheme) {
+      this.generator.processDrawing(this.element, this.getElementG());
+      this.activeGenerator.processDrawing(
+        this.element,
+        PlaitBoard.getElementActiveHost(this.board),
+        {
+          selected: this.selected,
+        }
+      );
     } else {
-      const hasSameSelected = value.selected === previous.selected;
+      const needUpdate = value.selected !== previous.selected;
+      if (needUpdate) {
+        this.activeGenerator.processDrawing(
+          this.element,
+          PlaitBoard.getElementActiveHost(this.board),
+          {
+            selected: this.selected,
+          }
+        );
+      }
     }
   }
 
   destroy(): void {
     super.destroy();
+    this.activeGenerator?.destroy();
   }
 }
