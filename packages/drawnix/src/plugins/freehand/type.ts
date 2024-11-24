@@ -1,5 +1,6 @@
 import { StrokeStyle } from '@plait/common';
 import { DEFAULT_COLOR, PlaitElement, Point } from '@plait/core';
+import { PlaitCustomGeometry } from '@plait/draw';
 
 export const DefaultFreehand = {
   strokeColor: DEFAULT_COLOR,
@@ -13,15 +14,8 @@ export enum FreehandShape {
   markerHighlight = 'markerHighlight',
 }
 
-export interface Freehand extends PlaitElement {
-  type: 'freehand';
-  points: Point[];
-  shape: FreehandShape;
-  strokeColor?: string;
-  strokeWidth?: number;
-  strokeStyle?: StrokeStyle;
-  fill?: string;
-}
+export interface Freehand
+  extends PlaitCustomGeometry<'freehand', Point[], FreehandShape> {}
 
 export const Freehand = {
   isFreehand: (value: any): value is Freehand => {

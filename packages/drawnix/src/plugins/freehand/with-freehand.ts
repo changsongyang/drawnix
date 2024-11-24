@@ -2,6 +2,7 @@ import {
   isPolylineHitRectangle,
   PlaitBoard,
   PlaitElement,
+  PlaitOptionsBoard,
   PlaitPluginElementContext,
   RectangleClient,
   Selection,
@@ -9,8 +10,13 @@ import {
 import { Freehand } from './type';
 import { FreehandComponent } from './freehand.component';
 import { withFreehandCreate } from './with-freehand-create';
-import { getFreehandHitElement, isHitFreehand } from './utils';
+import { isHitFreehand } from './utils';
 import { withFreehandFragment } from './with-freehand-fragment';
+import {
+  getHitDrawElement,
+  WithDrawOptions,
+  WithDrawPluginKey,
+} from '@plait/draw';
 
 export const withFreehand = (board: PlaitBoard) => {
   const {
@@ -20,6 +26,7 @@ export const withFreehand = (board: PlaitBoard) => {
     isRectangleHit,
     getHitElement,
     isMovable,
+    isAlign,
   } = board;
 
   board.drawElement = (context: PlaitPluginElementContext) => {
@@ -59,7 +66,7 @@ export const withFreehand = (board: PlaitBoard) => {
   board.getHitElement = (elements) => {
     const isAllFreehand = elements.every((item) => Freehand.isFreehand(item));
     if (isAllFreehand) {
-      return getFreehandHitElement(board, elements as Freehand[]);
+      return getHitDrawElement(board, elements);
     }
     return getHitElement(elements);
   };
@@ -70,6 +77,18 @@ export const withFreehand = (board: PlaitBoard) => {
     }
     return isMovable(element);
   };
+
+  board.isAlign = (element) => {
+    if (Freehand.isFreehand(element)) {
+      return true;
+    }
+    return isAlign(element);
+  };
+
+  (board as PlaitOptionsBoard).setPluginOptions<WithDrawOptions>(
+    WithDrawPluginKey,
+    { customGeometryTypes: ['freehand'] }
+  );
 
   return withFreehandFragment(withFreehandCreate(board));
 };
